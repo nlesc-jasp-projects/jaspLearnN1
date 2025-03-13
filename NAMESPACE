@@ -1,1 +1,2 @@
+export(ReversalDesign)
 import(jaspBase)
