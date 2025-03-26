@@ -19,10 +19,61 @@
   if (options[["enableIntroText"]] && is.null(jaspResults[["introText"]])) {
     introText <- createJaspHtml(
       textFun(),
-      title = gettext("Introduction")
+      title = gettext("Introduction"),
+      position = 1
     )
     introText$dependOn("enableIntroText")
 
     jaspResults[["introText"]] <- introText
   }
+}
+
+.ln1CreateDataPlot <- function(jaspResults, dataset, options, dependencyFun) {
+  if (options[["plotData"]] && is.null(jaspResults[["dataPlot"]])) {
+    dataPlot <- createJaspPlot(
+      title = gettext("Data plot"),
+      height = 480,
+      width = 480,
+      position = 2
+    )
+    dataPlot$dependOn(c("plotData", dependencyFun()))
+    dataPlot$plotObject <- .ln1CreateDataPlotFill(dataset, options)
+    # jaspDescriptives::.tsFillTimeSeriesPlot(dataPlot, dataset, options, "both", "none")
+    jaspResults[["dataPlot"]] <- dataPlot
+  }
+}
+
+.ln1GetVariableNames <- function(options) {
+  varList <- switch(options[["inputType"]],
+    "simulateData" = list("time" = "time", "dependent" = "y", "phase" = "phase"),
+    "loadData" = list("time" = options[["time"]], "dependent" = options[["dependent"]], "phase" = options[["phase"]])
+  )
+
+  return(varList)
+}
+
+.ln1CreateDataPlotFill <- function(dataset, options) {
+  variableNames <- .ln1GetVariableNames(options)
+
+  yName <- variableNames[["dependent"]]
+
+  xBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[["t"]])
+  yBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[[yName]])
+
+  p <- ggplot2::ggplot(
+      dataset,
+      ggplot2::aes(
+        x = .data[["t"]],
+        y = .data[[yName]],
+        color = .data[[variableNames[["phase"]]]]
+      )
+    ) +
+    jaspGraphs::geom_point() +
+    jaspGraphs::geom_line() +
+    ggplot2::scale_x_continuous(breaks = xBreaks, limits = range(xBreaks)) +
+    ggplot2::scale_y_continuous(breaks = yBreaks, limits = range(yBreaks)) +
+    jaspGraphs::geom_rangeframe() +
+    jaspGraphs::themeJaspRaw()
+
+  return(p)
 }
