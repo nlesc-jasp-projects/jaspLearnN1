@@ -18,7 +18,7 @@
 Treatment <- function(jaspResults, dataset = NULL, options) {
   jaspResults$title <- gettext("Does The Treatment Work?")
 
-  .ln1TreatIntro(jaspResults, options)
+  .ln1Intro(jaspResults, options, .ln1TreatIntroText)
 
   dataset <- .ln1TreatData(jaspResults, dataset, options)
 
@@ -31,16 +31,8 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   return()
 }
 
-.ln1TreatIntro <- function(jaspResults, options) {
-  if (options[["enableIntroText"]] && is.null(jaspResults[["introText"]])) {
-    introText <- createJaspHtml(
-      gettext("Welcome to Does The Treatment Work? ..."),
-      title = gettext("Introduction")
-    )
-    introText$dependOn("enableIntroText")
-
-    jaspResults[["introText"]] <- introText
-  }
+.ln1TreatIntroText <- function() {
+  return(gettext("Welcome to Does The Treatment Work? ..."))
 }
 
 .ln1TreatData <- function(jaspResults, dataset, options) {
