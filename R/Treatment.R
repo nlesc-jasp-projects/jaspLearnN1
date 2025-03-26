@@ -24,9 +24,9 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 
   ready <- !is.null(jaspResults[["simulatedDataState"]])
 
-  .ln1TreatCreateDataPlot(jaspResults, dataset, options)
-  .l1revEstimateModel(jaspResults, dataset, options, ready)
-  .l1revCreateCoefficientsTable(jaspResults, options, ready)
+  .ln1CreateDataPlot(jaspResults, dataset, options, .ln1TreatGetSimulatedDataDependencies)
+  .ln1TreatEstimateModel(jaspResults, dataset, options, ready)
+  .ln1TreatCreateCoefficientsTable(jaspResults, options, ready)
 
   return()
 }
@@ -81,51 +81,6 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   return(simData)
 }
 
-.ln1TreatCreateDataPlot <- function(jaspResults, dataset, options) {
-  if (options[["plotData"]] && is.null(jaspResults[["dataPlot"]])) {
-    dataPlot <- createJaspPlot(title = gettext("Data plot"), height = 480, width = 480)
-    dataPlot$dependOn(c("plotData", .ln1TreatGetSimulatedDataDependencies()))
-    dataPlot$plotObject <- .ln1TreatCreateDataPlotFill(dataset, options)
-    # jaspDescriptives::.tsFillTimeSeriesPlot(dataPlot, dataset, options, "both", "none")
-    jaspResults[["dataPlot"]] <- dataPlot
-  }
-}
-
-.ln1TreatGetVariableNames <- function(options) {
-  varList <- switch(options[["inputType"]],
-    "simulateData" = list("time" = "time", "dependent" = "y", "phase" = "phase"),
-    "loadData" = list("time" = options[["time"]], "dependent" = options[["dependent"]], "phase" = options[["phase"]])
-  )
-
-  return(varList)
-}
-
-.ln1TreatCreateDataPlotFill <- function(dataset, options) {
-  variableNames <- .ln1TreatGetVariableNames(options)
-
-  yName <- variableNames[["dependent"]]
-
-  xBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[["t"]])
-  yBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[[yName]])
-
-  p <- ggplot2::ggplot(
-      dataset,
-      ggplot2::aes(
-        x = .data[["t"]],
-        y = .data[[yName]],
-        color = .data[[variableNames[["phase"]]]]
-      )
-    ) +
-    jaspGraphs::geom_point() +
-    jaspGraphs::geom_line() +
-    ggplot2::scale_x_continuous(breaks = xBreaks, limits = range(xBreaks)) +
-    ggplot2::scale_y_continuous(breaks = yBreaks, limits = range(yBreaks)) +
-    jaspGraphs::geom_rangeframe() +
-    jaspGraphs::themeJaspRaw()
-
-  return(p)
-}
-
 .ln1TreatGetSimulatedDataDependencies <- function() {
   return(c(
     "inputType",
@@ -141,32 +96,32 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   ))
 }
 
-.l1revCreateModelFormula <- function(options) {
-  variableNames <- .ln1TreatGetVariableNames(options)
+.ln1TreatCreateModelFormula <- function(options) {
+  variableNames <- .ln1GetVariableNames(options)
 
   f <- as.formula(paste(variableNames[["dependent"]], "~", variableNames[["time"]], "*", variableNames[["phase"]]))
 
   return(f)
 }
 
-.l1revEstimateModelHelper <- function(dataset, options) {
-  f <- .l1revCreateModelFormula(options)
+.ln1TreatEstimateModelHelper <- function(dataset, options) {
+  f <- .ln1TreatCreateModelFormula(options)
 
   mod <- stats::lm(f, data=dataset)
 
   return(mod)
 }
 
-.l1revEstimateModel <- function(jaspResults, dataset, options, ready) {
+.ln1TreatEstimateModel <- function(jaspResults, dataset, options, ready) {
   if (ready && is.null(jaspResults[["modelState"]])) {
-    modelObject <- .l1revEstimateModelHelper(dataset, options)
+    modelObject <- .ln1TreatEstimateModelHelper(dataset, options)
     modelState <- createJaspState(object = modelObject)
     modelState$dependOn(.ln1TreatGetSimulatedDataDependencies())
     jaspResults[["modelState"]] <- modelState
   }
 }
 
-.l1revCreateCoefficientsTable <- function(jaspResults, options, ready) {
+.ln1TreatCreateCoefficientsTable <- function(jaspResults, options, ready) {
   if (is.null(jaspResults[["coefTable"]])) {
     table <- createJaspTable(gettext("Coefficients"))
     table$dependOn(.ln1TreatGetSimulatedDataDependencies())
@@ -183,14 +138,14 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
     table$addColumnInfo(name = "upper", title = gettext("Upper"), type = "number", overtitle = overtitle)
 
     if (!is.null(jaspResults[["modelState"]]) && ready) {
-      .l1revFillCoefficientsTable(table, jaspResults[["modelState"]]$object, options)
+      .ln1TreatFillCoefficientsTable(table, jaspResults[["modelState"]]$object, options)
     }
 
     jaspResults[["coefTable"]] <- table
   }
 }
 
-# .l1revFormatCoefficientNames <- function(modelObject) {
+# .ln1TreatFormatCoefficientNames <- function(modelObject) {
 #   modelTerms <- terms(modelObject)
 
 #   coefNames <- c("(Intercept)")
@@ -216,7 +171,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 #   return(coefNames)
 # }
 
-.l1revFillCoefficientsTable <- function(table, modelObject, options) {
+.ln1TreatFillCoefficientsTable <- function(table, modelObject, options) {
   print(terms(modelObject))
   modelSummary <- summary(modelObject)
   modelCoefficients <- data.frame(modelSummary[["coefficients"]])
