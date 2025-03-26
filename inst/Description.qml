@@ -15,8 +15,8 @@ Description
 
 	Analysis
 	{
-		title	:	qsTr("Reversal Design")
-		func	:	"ReversalDesign"
-		qml		:	"ReversalDesign.qml"
+		title	:	qsTr("Does The Treatment Work?")
+		func	:	"Treatment"
+		qml		:	"Treatment.qml"
 	}
 }

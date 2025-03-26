@@ -15,26 +15,26 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-ReversalDesign <- function(jaspResults, dataset = NULL, options) {
-  jaspResults$title <- gettext("Random Effects")
+Treatment <- function(jaspResults, dataset = NULL, options) {
+  jaspResults$title <- gettext("Does The Treatment Work?")
 
-  .ln1revIntro(jaspResults, options)
+  .ln1TreatIntro(jaspResults, options)
 
-  dataset <- .ln1revData(jaspResults, dataset, options)
+  dataset <- .ln1TreatData(jaspResults, dataset, options)
 
   ready <- !is.null(jaspResults[["simulatedDataState"]])
 
-  .ln1revCreateDataPlot(jaspResults, dataset, options)
+  .ln1TreatCreateDataPlot(jaspResults, dataset, options)
   .l1revEstimateModel(jaspResults, dataset, options, ready)
   .l1revCreateCoefficientsTable(jaspResults, options, ready)
 
   return()
 }
 
-.ln1revIntro <- function(jaspResults, options) {
+.ln1TreatIntro <- function(jaspResults, options) {
   if (options[["enableIntroText"]] && is.null(jaspResults[["introText"]])) {
     introText <- createJaspHtml(
-      gettext("Welcome to Random Effects ..."),
+      gettext("Welcome to Does The Treatment Work? ..."),
       title = gettext("Introduction")
     )
     introText$dependOn("enableIntroText")
@@ -43,12 +43,12 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
   }
 }
 
-.ln1revData <- function(jaspResults, dataset, options) {
+.ln1TreatData <- function(jaspResults, dataset, options) {
   if (options[["inputType"]] == "simulateData") {
     if (is.null(jaspResults[["simulatedDataState"]])) {
-      dataset <- .ln1revSimulateData(options)
+      dataset <- .ln1TreatSimulateData(options)
       dataState <- createJaspState(object = dataset)
-      dataState$dependOn(.ln1revGetSimulatedDataDependencies())
+      dataState$dependOn(.ln1TreatGetSimulatedDataDependencies())
       jaspResults[["simulatedDataState"]] <- dataState
     } else {
       dataset <- jaspResults[["simulatedDataState"]]$object
@@ -58,7 +58,7 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
   return(dataset)
 }
 
-.ln1revSimulateData <- function(options) {
+.ln1TreatSimulateData <- function(options) {
   set.seed(options[["seed"]])
 
   phaseN <- sapply(options[["simPhaseEffects"]], function(x) x[["simPhaseEffectN"]])
@@ -89,17 +89,17 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
   return(simData)
 }
 
-.ln1revCreateDataPlot <- function(jaspResults, dataset, options) {
+.ln1TreatCreateDataPlot <- function(jaspResults, dataset, options) {
   if (options[["plotData"]] && is.null(jaspResults[["dataPlot"]])) {
     dataPlot <- createJaspPlot(title = gettext("Data plot"), height = 480, width = 480)
-    dataPlot$dependOn(c("plotData", .ln1revGetSimulatedDataDependencies()))
-    dataPlot$plotObject <- .ln1revCreateDataPlotFill(dataset, options)
+    dataPlot$dependOn(c("plotData", .ln1TreatGetSimulatedDataDependencies()))
+    dataPlot$plotObject <- .ln1TreatCreateDataPlotFill(dataset, options)
     # jaspDescriptives::.tsFillTimeSeriesPlot(dataPlot, dataset, options, "both", "none")
     jaspResults[["dataPlot"]] <- dataPlot
   }
 }
 
-.ln1revGetVariableNames <- function(options) {
+.ln1TreatGetVariableNames <- function(options) {
   varList <- switch(options[["inputType"]],
     "simulateData" = list("time" = "time", "dependent" = "y", "phase" = "phase"),
     "loadData" = list("time" = options[["time"]], "dependent" = options[["dependent"]], "phase" = options[["phase"]])
@@ -108,8 +108,8 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
   return(varList)
 }
 
-.ln1revCreateDataPlotFill <- function(dataset, options) {
-  variableNames <- .ln1revGetVariableNames(options)
+.ln1TreatCreateDataPlotFill <- function(dataset, options) {
+  variableNames <- .ln1TreatGetVariableNames(options)
 
   yName <- variableNames[["dependent"]]
 
@@ -134,7 +134,7 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
   return(p)
 }
 
-.ln1revGetSimulatedDataDependencies <- function() {
+.ln1TreatGetSimulatedDataDependencies <- function() {
   return(c(
     "inputType",
     "dependent",
@@ -150,7 +150,7 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
 }
 
 .l1revCreateModelFormula <- function(options) {
-  variableNames <- .ln1revGetVariableNames(options)
+  variableNames <- .ln1TreatGetVariableNames(options)
 
   f <- as.formula(paste(variableNames[["dependent"]], "~", variableNames[["time"]], "*", variableNames[["phase"]]))
 
@@ -169,7 +169,7 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
   if (ready && is.null(jaspResults[["modelState"]])) {
     modelObject <- .l1revEstimateModelHelper(dataset, options)
     modelState <- createJaspState(object = modelObject)
-    modelState$dependOn(.ln1revGetSimulatedDataDependencies())
+    modelState$dependOn(.ln1TreatGetSimulatedDataDependencies())
     jaspResults[["modelState"]] <- modelState
   }
 }
@@ -177,7 +177,7 @@ ReversalDesign <- function(jaspResults, dataset = NULL, options) {
 .l1revCreateCoefficientsTable <- function(jaspResults, options, ready) {
   if (is.null(jaspResults[["coefTable"]])) {
     table <- createJaspTable(gettext("Coefficients"))
-    table$dependOn(.ln1revGetSimulatedDataDependencies())
+    table$dependOn(.ln1TreatGetSimulatedDataDependencies())
 
     table$addColumnInfo(name = "name",         title = "",                        type = "string")
     table$addColumnInfo(name = "coef",         title = gettext("Estimate"),       type = "number")
