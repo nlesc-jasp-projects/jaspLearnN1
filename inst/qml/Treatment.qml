@@ -21,17 +21,15 @@ import QtQuick.Layouts
 import JASP
 import JASP.Controls
 
+import "./common" as Common
+
 Form
 {
 	Group
 	{
 		columns: 2
 
-		CheckBox
-		{
-			name: "enableIntroText"
-			label: qsTr("Introductory text")
-		}
+		Common.IntroText{}
 
 		CheckBox
 		{
@@ -47,16 +45,7 @@ Form
 		id: sectionData
 		columns:1
 
-		RadioButtonGroup
-		{
-			name: "inputType"
-			title: qsTr("Input Type")
-			columns: 3
-			
-			RadioButton { value: "simulateData"; id: simulateData; label: qsTr("Simulate data"); checked: true }
-			RadioButton { value: "loadData"; id: loadData; label: qsTr("Load data") }
-			RadioButton { value: "enterData"; id: enterData; label: qsTr("Enter data") }
-		}
+		Common.InputType{}
 
 		VariablesForm
 		{
