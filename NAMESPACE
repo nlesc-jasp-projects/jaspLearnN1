@@ -1,2 +1,2 @@
-export(ReversalDesign)
+export(Treatment)
 import(jaspBase)
