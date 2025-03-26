@@ -11,9 +11,11 @@ License: GPL (>= 2)
 Encoding: UTF-8
 Imports:
   jaspBase,
-  jaspGraphs
+  jaspGraphs,
+  jaspTimeSeries
 Suggests:
   testthat
 Remotes:
   jasp-stats/jaspBase,
   jasp-stats/jaspGraphs
+  jasp-stats/jaspTimeSeries

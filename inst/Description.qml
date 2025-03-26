@@ -19,4 +19,11 @@ Description
 		func	:	"Treatment"
 		qml		:	"Treatment.qml"
 	}
+
+	Analysis
+	{
+		title	:	qsTr("Forecasting")
+		func	:	"Forecasting"
+		qml		:	"Forecasting.qml"
+	}
 }
