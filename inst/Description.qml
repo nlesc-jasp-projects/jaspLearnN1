@@ -22,7 +22,7 @@ Description
 
 	Analysis
 	{
-		title	:	qsTr("Forecasting")
+		title	:	qsTr("How Do Symptoms Develop?")
 		func	:	"Forecasting"
 		qml		:	"Forecasting.qml"
 	}
