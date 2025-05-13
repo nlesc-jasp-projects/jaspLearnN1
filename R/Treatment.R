@@ -32,7 +32,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 }
 
 .ln1TreatIntroText <- function() {
-  return(gettext("Welcome to Does The Treatment Work? ..."))
+  return(gettext("This model helps answer questions about how a patient's symptoms fluctuate over time and what factors predict changes in their mental health on an individual level. It requires repeated measures of symptom severity, behaviors, or other psychological variables over time, along with potential predictors like therapy interventions or daily stressors. A key feature is its ability to account for within-person variability while distinguishing stable patterns from momentary fluctuations. This is particularly useful for therapists aiming to tailor interventions based on a patient's unique response dynamics. Unlike group-level analyses, this approach provides individualized insights rather than assuming uniform effects across patients."))
 }
 
 .ln1TreatData <- function(jaspResults, dataset, options) {
