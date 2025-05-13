@@ -80,7 +80,16 @@ Forecasting <- function(jaspResults, dataset = NULL, options) {
 }
 
 .ln1ForeIntroText <- function() {
-  return(gettext("Welcome to Forecasting ..."))
+  return(gettext("Forecasting is an analysis to make predictions on the future development of a dynamic process.  You can think of making predicting on the weather or on the economy. In clinical practice, forecasting can be applied to the symptom develop of a client during treatment. This helps to anticipate new developments. For example when the expectation is that a client wont improve much, a therapist and client can discuss if a different therapeutic strategy is needed. However, if it is expected that more progress will be made, a treatment should of course continue as planned. 
+
+<b>How does it work?</b> 
+
+These analyses can predict a patient's future mental health states based on their past symptom trajectories, helping therapists anticipate potential crises or treatment responses. They require a structured dataset with frequent, time-stamped observations of symptoms, behaviors, and external influences. The notable aspect of forecasting models is their emphasis on trend detection and anomaly identification, which aids in early intervention strategies. By leveraging past data, therapists can proactively adjust treatment plans rather than reacting to deteriorations after they occur. However, the accuracy of predictions depends on the quality and granularity of the available data.
+
+An important aspect of applying forecasting in clinical practice is therefore how frequent measurements are collected. In general, one can say that the more frequent data is being collected, to better the predictions are expected to be. However, one most also consider what is feasible for a client, and at what level meaningful fluctuations occur. For instance, if the symptoms do not really vary daily, it would not help to measure these daily. On the other hand, if one measures only once every three months, you can miss important changes in the treatment process, and this will make predictions on future developments less accurate. As a rule of thumb, you can consider measuring weekly.  
+
+Forecasting is an umbrella term that captures many different analysis techniques, which a re also implemented in JASP. This tutorial is based on the autoregressive integrated moving average (ARIMA) a gold standard in forecasting. The 'autoregressive' (AR) part of ARIMA indicates that the evolving variable of interest is regressed on its prior values. The 'moving average' (MA) part indicates that the regression error is a linear combination of error terms whose values occurred contemporaneously and at various times in the past.[3] The 'integrated' (I) part indicates that the data values have been replaced with the difference between each value and the previous value. Other techniques include baysian forecasting implementen in the prophet module [LINK].
+"))
 } 
 
 .ln1ForeData <- function(jaspResults, dataset, options) {
