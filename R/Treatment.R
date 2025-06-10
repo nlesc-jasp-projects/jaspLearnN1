@@ -28,7 +28,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
     ready <- TRUE
   }
 
-  .ln1TreatCreateDataPlot(jaspResults, dataset, options, .ln1TreatGetSimulatedDataDependencies)
+  .ln1TreatCreateDataPlot(jaspResults, dataset, options, .ln1TreatGetDataDependencies)
   .ln1TreatEstimateModel(jaspResults, dataset, options, ready)
   .ln1TreatCreateCoefficientsTable(jaspResults, options, ready)
 
@@ -44,7 +44,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
     if (is.null(jaspResults[["simulatedDataState"]])) {
       dataset <- .ln1TreatSimulateData(options)
       dataState <- createJaspState(object = dataset)
-      dataState$dependOn(.ln1TreatGetSimulatedDataDependencies())
+      dataState$dependOn(.ln1TreatGetDataDependencies())
       jaspResults[["simulatedDataState"]] <- dataState
     } else {
       dataset <- jaspResults[["simulatedDataState"]]$object
@@ -85,7 +85,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   return(simData)
 }
 
-.ln1TreatGetSimulatedDataDependencies <- function() {
+.ln1TreatGetDataDependencies <- function() {
   return(c(
     "inputType",
     "dependent",
@@ -139,7 +139,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   if (ready && is.null(jaspResults[["modelState"]])) {
     modelObject <- .ln1TreatEstimateModelHelper(dataset, options)
     modelState <- createJaspState(object = modelObject)
-    modelState$dependOn(.ln1TreatGetSimulatedDataDependencies())
+    modelState$dependOn(.ln1TreatGetDataDependencies())
     jaspResults[["modelState"]] <- modelState
   }
 }
@@ -147,7 +147,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 .ln1TreatCreateCoefficientsTable <- function(jaspResults, options, ready) {
   if (is.null(jaspResults[["coefTable"]])) {
     table <- createJaspTable(gettext("Coefficients"))
-    table$dependOn(.ln1TreatGetSimulatedDataDependencies())
+    table$dependOn(.ln1TreatGetDataDependencies())
 
     table$addColumnInfo(name = "name",         title = "",                        type = "string")
     table$addColumnInfo(name = "coef",         title = gettext("Estimate"),       type = "number")
