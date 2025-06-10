@@ -66,6 +66,7 @@ Form
 			{
 				name:			"time"
 				title:			qsTr("Time")
+				singleVariable: true
 			}
 			AssignedVariablesList
 			{
@@ -187,19 +188,9 @@ Form
 
 	Section
 	{
-		title: qsTr("Model")
-	}
-
-	Section
-	{
 		title: qsTr("Options")
 
 		CIField { name: "coefficientCiLevel"; label: qsTr("Confidence interval")}
-	}
-
-	Section
-	{
-		title: qsTr("Plots")
 	}
 
 	Section
