@@ -16,18 +16,23 @@
 #
 
 Forecasting <- function(jaspResults, dataset = NULL, options) {
-  jaspResults$title <- gettext("Random Effects")
+  jaspResults$title <- gettext("How Do Symptoms Develop?")
 
   .ln1Intro(jaspResults, options, .ln1ForeIntroText)
 
-  dataset <- .ln1ForeData(jaspResults, dataset, options)
+  if (options$inputType == "loadData") {
+    ready <- options$dependent != ""
+  } else {
+    ready <- TRUE
+  }
 
-  ready <- !is.null(jaspResults[["simulatedDataState"]])
+  dataset <- .ln1ForeData(jaspResults, dataset, options, ready)
 
-  .ln1CreateDataPlot(jaspResults, dataset, options, .ln1ForeGetSimulatedDataDependencies)
+  .ln1NetCreateDataPlot(jaspResults, dataset, options, .ln1ForeGetSimulatedDataDependencies, ready)
+
   .ln1ForeEstimateModel(jaspResults, dataset, options, ready)
 
-  options[["intercept"]] <- FALSE # Required by .tsCreateTableCoefficients
+  options[["intercept"]] <- TRUE # Required by .tsCreateTableCoefficients
 
   jaspTimeSeries:::.tsCreateTableCoefficients(
     jaspResults,
@@ -92,16 +97,20 @@ Forecasting is an umbrella term that captures many different analysis techniques
 "))
 } 
 
-.ln1ForeData <- function(jaspResults, dataset, options) {
+.ln1ForeData <- function(jaspResults, dataset, options, ready) {
   if (options[["inputType"]] == "simulateData") {
-    if (is.null(jaspResults[["simulatedDataState"]])) {
+    if (is.null(jaspResults[["dataState"]])) {
       dataset <- .ln1ForeSimulateData(options)
       dataState <- createJaspState(object = dataset)
       dataState$dependOn(.ln1ForeGetSimulatedDataDependencies())
-      jaspResults[["simulatedDataState"]] <- dataState
+      jaspResults[["dataState"]] <- dataState
     } else {
-      dataset <- jaspResults[["simulatedDataState"]]$object
+      dataset <- jaspResults[["dataState"]]$object
     }
+  } else {
+    datasetRaw <- jaspDescriptives::.tsReadData(jaspResults, dataset, options, ready, covariates = TRUE)
+    dataset <- jaspDescriptives::.tsDataWithMissingRowsHandler(datasetRaw, options, ready)
+    jaspDescriptives::.tsErrorHandler(dataset, ready)
   }
 
   return(dataset)
@@ -165,17 +174,61 @@ Forecasting is an umbrella term that captures many different analysis techniques
 }
 
 .ln1ForeEstimateModelHelper <- function(dataset, options) {
-  variableNames <- .ln1GetVariableNames(options)
-
   mod <-try(forecast::auto.arima(
-    dataset[[variableNames[["dependent"]]]],
-    allowdrift = FALSE,
-    allowmean = FALSE
+    dataset[["y"]],
+    allowdrift = TRUE,
+    allowmean = TRUE
   ))
 
   if (jaspBase::isTryError(mod)) {
     .quitAnalysis(jaspBase::.extractErrorMessage(mod))
   }
 
+  if (length(mod$coef) == 0) {
+    .quitAnalysis(gettext("No parameters are estimated."))
+  }
+
   return(mod)
+}
+
+.ln1NetCreateDataPlot <- function(jaspResults, dataset, options, dependencyFun, ready) {
+  if (options[["plotData"]] && is.null(jaspResults[["dataPlot"]])) {
+    dataPlot <- createJaspPlot(
+      title = gettext("Data plot"),
+      height = 480,
+      width = 480,
+      position = 1
+    )
+
+    dataPlot$dependOn(c("plotData", dependencyFun()))
+
+    if (ready) {
+      dataPlot$plotObject <- .ln1NetCreateDataPlotFill(dataset, options)
+    }
+
+    jaspResults[["dataPlot"]] <- dataPlot
+  }
+}
+
+.ln1NetCreateDataPlotFill <- function(dataset, options) {
+  yName <- options$dependent
+
+  xBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[["t"]])
+  yBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[["y"]])
+
+  p <- ggplot2::ggplot(
+      dataset,
+      mapping = ggplot2::aes(
+        x = .data[["t"]],
+        y = .data[["y"]]
+      )
+    ) +
+    jaspGraphs::geom_line() +
+    jaspGraphs::geom_point() +
+    ggplot2::scale_x_continuous(name = gettext("Time"), breaks = xBreaks, limits = range(xBreaks)) +
+    ggplot2::scale_y_continuous(name = yName, breaks = yBreaks, limits = range(yBreaks)) +
+    jaspGraphs::geom_rangeframe() +
+    jaspGraphs::themeJaspRaw()
+
+  return(p)
 }

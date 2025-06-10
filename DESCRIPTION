@@ -12,6 +12,7 @@ Encoding: UTF-8
 Imports:
   ggraph,
   jaspBase,
+  jaspDescriptives,
   jaspGraphs,
   jaspTimeSeries,
   tidygraph
@@ -19,5 +20,6 @@ Suggests:
   testthat
 Remotes:
   jasp-stats/jaspBase,
+  jasp-stats/jaspDescriptives,
   jasp-stats/jaspGraphs,
   jasp-stats/jaspTimeSeries
