@@ -28,7 +28,7 @@ Forecasting <- function(jaspResults, dataset = NULL, options) {
 
   dataset <- .ln1ForeData(jaspResults, dataset, options, ready)
 
-  .ln1NetCreateDataPlot(jaspResults, dataset, options, .ln1ForeGetSimulatedDataDependencies, ready)
+  .ln1NetCreateDataPlot(jaspResults, dataset, options, .ln1ForeGetDataDependencies, ready)
 
   .ln1ForeEstimateModel(jaspResults, dataset, options, ready)
 
@@ -41,7 +41,7 @@ Forecasting <- function(jaspResults, dataset = NULL, options) {
     options,
     ready,
     2,
-    .ln1ForeGetSimulatedDataDependencies()
+    .ln1ForeGetDataDependencies()
   )
 
   jaspTimeSeries:::.tsForecastPlot(
@@ -52,7 +52,7 @@ Forecasting <- function(jaspResults, dataset = NULL, options) {
     options,
     ready,
     3,
-    c(.ln1ForeGetSimulatedDataDependencies(),
+    c(.ln1ForeGetDataDependencies(),
       "forecastLength",
       "forecastTimeSeries",
       "forecastTimeSeriesType",
@@ -67,7 +67,7 @@ Forecasting <- function(jaspResults, dataset = NULL, options) {
     options,
     ready,
     4,
-    c(.ln1ForeGetSimulatedDataDependencies(),
+    c(.ln1ForeGetDataDependencies(),
       "forecastLength",
       "forecastTable")
   )
@@ -102,7 +102,7 @@ Forecasting is an umbrella term that captures many different analysis techniques
     if (is.null(jaspResults[["dataState"]])) {
       dataset <- .ln1ForeSimulateData(options)
       dataState <- createJaspState(object = dataset)
-      dataState$dependOn(.ln1ForeGetSimulatedDataDependencies())
+      dataState$dependOn(.ln1ForeGetDataDependencies())
       jaspResults[["dataState"]] <- dataState
     } else {
       dataset <- jaspResults[["dataState"]]$object
@@ -116,7 +116,7 @@ Forecasting is an umbrella term that captures many different analysis techniques
   return(dataset)
 }
 
-.ln1ForeGetSimulatedDataDependencies <- function() {
+.ln1ForeGetDataDependencies <- function() {
   return(c(
     "inputType",
     "dependent",
@@ -168,7 +168,7 @@ Forecasting is an umbrella term that captures many different analysis techniques
   if (ready && is.null(jaspResults[["modelState"]])) {
     modelObject <- .ln1ForeEstimateModelHelper(dataset, options)
     modelState <- createJaspState(object = modelObject)
-    modelState$dependOn(.ln1ForeGetSimulatedDataDependencies())
+    modelState$dependOn(.ln1ForeGetDataDependencies())
     jaspResults[["modelState"]] <- modelState
   }
 }
