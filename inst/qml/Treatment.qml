@@ -45,11 +45,14 @@ Form
 		id: sectionData
 		columns:1
 
-		Common.InputType{}
+		Common.InputType
+		{
+			id: inputType
+		}
 
 		VariablesForm
 		{
-			visible: loadData.checked
+			visible: inputType.value == "loadData"
 
 			AvailableVariablesList { name: "allVariablesList" }
 			AssignedVariablesList
@@ -63,12 +66,15 @@ Form
 			{
 				name:			"time"
 				title:			qsTr("Time")
+				allowedColumns:	["scale"]
+				singleVariable:	true
 			}
 			AssignedVariablesList
 			{
 				name:			"phase"
 				title:			qsTr("Phase Variable")
 				allowedColumns:	["nominal"]
+				singleVariable:	true
 			}
 		}
 
@@ -186,18 +192,8 @@ Form
 
 	Section
 	{
-		title: qsTr("Model")
-	}
-
-	Section
-	{
 		title: qsTr("Options")
 
 		CIField { name: "coefficientCiLevel"; label: qsTr("Confidence interval")}
-	}
-
-	Section
-	{
-		title: qsTr("Plots")
 	}
 }

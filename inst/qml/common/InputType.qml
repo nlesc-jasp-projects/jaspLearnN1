@@ -29,5 +29,4 @@ RadioButtonGroup
 	
 	RadioButton { value: "simulateData"; id: simulateData; label: qsTr("Simulate data"); checked: true }
 	RadioButton { value: "loadData"; id: loadData; label: qsTr("Load data") }
-	RadioButton { value: "enterData"; id: enterData; label: qsTr("Enter data") }
 }

@@ -22,9 +22,13 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 
   dataset <- .ln1TreatData(jaspResults, dataset, options)
 
-  ready <- !is.null(jaspResults[["simulatedDataState"]])
+  if (options$inputType == "loadData") {
+    ready <- options$dependent != "" && options$time != "" && options$phase != ""
+  } else {
+    ready <- TRUE
+  }
 
-  .ln1CreateDataPlot(jaspResults, dataset, options, .ln1TreatGetSimulatedDataDependencies)
+  .ln1TreatCreateDataPlot(jaspResults, dataset, options, .ln1TreatGetSimulatedDataDependencies)
   .ln1TreatEstimateModel(jaspResults, dataset, options, ready)
   .ln1TreatCreateCoefficientsTable(jaspResults, options, ready)
 
@@ -94,6 +98,25 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
     "simPhaseEffects",
     "seed"
   ))
+}
+
+.ln1GetVariableNames <- function(options) {
+  varList <- switch(options[["inputType"]],
+    "simulateData" = list(
+      "time" = "time",
+      "dependent" = "y",
+      "phase" = "phase",
+      "t" = "t"
+    ),
+    "loadData" = list(
+      "time" = options[["time"]],
+      "dependent" = options[["dependent"]],
+      "phase" = options[["phase"]],
+      "t" = options[["time"]]
+    )
+  )
+
+  return(varList)
 }
 
 .ln1TreatCreateModelFormula <- function(options) {
@@ -186,4 +209,49 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 
   table[["lower"]] <- ci[ ,1]
   table[["upper"]] <- ci[ ,2]
+}
+
+.ln1TreatCreateDataPlot <- function(jaspResults, dataset, options, dependencyFun) {
+  if (options[["plotData"]] && is.null(jaspResults[["dataPlot"]])) {
+    dataPlot <- createJaspPlot(
+      title = gettext("Data plot"),
+      height = 480,
+      width = 480,
+      position = 2
+    )
+    dataPlot$dependOn(c("plotData", dependencyFun()))
+    dataPlot$plotObject <- .ln1TreatCreateDataPlotFill(dataset, options)
+    jaspResults[["dataPlot"]] <- dataPlot
+  }
+}
+
+.ln1TreatCreateDataPlotFill <- function(dataset, options) {
+  variableNames <- .ln1GetVariableNames(options)
+
+  yName <- variableNames[["dependent"]]
+  xName <- variableNames[["t"]]
+
+  xBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[[xName]])
+  yBreaks <- jaspGraphs::getPrettyAxisBreaks(dataset[[yName]])
+
+  p <- ggplot2::ggplot(
+      dataset,
+      mapping = ggplot2::aes(
+        x = .data[[xName]],
+        y = .data[[yName]],
+        color = .data[[variableNames[["phase"]]]]
+      )
+    ) +
+    jaspGraphs::geom_line() +
+    jaspGraphs::geom_point() +
+    ggplot2::scale_x_continuous(
+      name = if (options$inputType == "loadData") yName else gettext("Time"),
+      breaks = xBreaks,
+      limits = range(xBreaks)
+    ) +
+    ggplot2::scale_y_continuous(breaks = yBreaks, limits = range(yBreaks)) +
+    jaspGraphs::geom_rangeframe() +
+    jaspGraphs::themeJaspRaw()
+
+  return(p)
 }
