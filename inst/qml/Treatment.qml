@@ -81,7 +81,7 @@ Form
 		Group
 		{
 			title: qsTr("Simulation Options")
-			visible: simulateData.checked
+			visible: inputType.value == "simulateData"
 
 			Group
 			{
