@@ -1,3 +1,4 @@
 export(Forecasting)
+export(Network)
 export(Treatment)
 import(jaspBase)
