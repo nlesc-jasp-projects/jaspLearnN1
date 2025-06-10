@@ -26,4 +26,11 @@ Description
 		func	:	"Forecasting"
 		qml		:	"Forecasting.qml"
 	}
+
+	Analysis
+	{
+		title	:	qsTr("How Are Symptoms Connected?")
+		func	:	"Network"
+		qml		:	"Network.qml"
+	}
 }
