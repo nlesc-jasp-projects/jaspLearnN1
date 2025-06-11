@@ -116,7 +116,7 @@ Network <- function(jaspResults, dataset = NULL, options) {
         }
       }
 
-      if (is.null(jaspResults[["centralityTableContainer"]][[edgelistName]]) && 
+      if (edgelistOptions[["centrality"]] && is.null(jaspResults[["centralityTableContainer"]][[edgelistName]]) && 
         !is.null(jaspResults[["centralityContainer"]][[edgelistName]])) {
         centralityTable <- createJaspTable(gettext(edgelistName))
         centralityTable$dependOn(
@@ -169,7 +169,7 @@ Network <- function(jaspResults, dataset = NULL, options) {
   if (!is.null(jaspResults[["edgelistContainer"]]) && length(jaspResults[["edgelistContainer"]]) > 0) {
     for (i in 1:length(options[["connectionList"]])) {
       edgelistOptions <- options[["connectionList"]][[i]]
-      if (.ln1NetCheckEdgelist(edgelistOptions)) {
+      if (edgelistOptions[["plotNetwork"]] && .ln1NetCheckEdgelist(edgelistOptions)) {
         edgelistName <- edgelistOptions[["name"]]
         dataPlot <- createJaspPlot(
           title = edgelistName,

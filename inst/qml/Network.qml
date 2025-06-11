@@ -151,7 +151,7 @@ Form
 				{
 					name: "centrality"
 					label: qsTr("Centrality statistics")
-					checked: true
+					checked: false
 				}
 			}
 		}
