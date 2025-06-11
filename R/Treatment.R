@@ -28,7 +28,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
     ready <- TRUE
   }
 
-  .ln1TreatCreateDataPlot(jaspResults, dataset, options, .ln1TreatGetDataDependencies)
+  .ln1TreatCreateDataPlot(jaspResults, dataset, options, .ln1TreatGetDataDependencies, ready)
   .ln1TreatEstimateModel(jaspResults, dataset, options, ready)
   .ln1TreatCreateCoefficientsTable(jaspResults, options, ready)
 
@@ -211,7 +211,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   table[["upper"]] <- ci[ ,2]
 }
 
-.ln1TreatCreateDataPlot <- function(jaspResults, dataset, options, dependencyFun) {
+.ln1TreatCreateDataPlot <- function(jaspResults, dataset, options, dependencyFun, ready) {
   if (options[["plotData"]] && is.null(jaspResults[["dataPlot"]])) {
     dataPlot <- createJaspPlot(
       title = gettext("Data plot"),
@@ -220,7 +220,9 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
       position = 2
     )
     dataPlot$dependOn(c("plotData", dependencyFun()))
-    dataPlot$plotObject <- .ln1TreatCreateDataPlotFill(dataset, options)
+    if (ready) {
+      dataPlot$plotObject <- .ln1TreatCreateDataPlotFill(dataset, options)
+    }
     jaspResults[["dataPlot"]] <- dataPlot
   }
 }
@@ -245,7 +247,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
     jaspGraphs::geom_line() +
     jaspGraphs::geom_point() +
     ggplot2::scale_x_continuous(
-      name = if (options$inputType == "loadData") yName else gettext("Time"),
+      name = if (options$inputType == "loadData") xName else gettext("Time"),
       breaks = xBreaks,
       limits = range(xBreaks)
     ) +
