@@ -194,6 +194,30 @@ Form
 	}
 
 	Section
+	{
+		title: qsTr("Plots")
+
+		Group
+		{
+			title: qsTr("Data plot")
+
+			CheckBox
+			{
+				name: "plotPoints"
+				label: qsTr("Points")
+				checked: true
+			}
+
+			CheckBox
+			{
+				name: "plotLine"
+				label: qsTr("Line")
+				checked: true
+			}
+		}
+	}
+
+	Section
     {
         title: qsTr("Forecasting")
         IntegerField
