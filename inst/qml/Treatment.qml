@@ -122,7 +122,7 @@ Form
 					{
 						name: "simTimeEffectAutocorrelation"
 						label: qsTr("Auto-correlation")
-						defaultValue: 1.0
+						defaultValue: 0
 						min: -1
 						max: 1
 						negativeValues: true
