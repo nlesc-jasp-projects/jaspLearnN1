@@ -131,12 +131,6 @@ Forecasting is an umbrella term that captures many different analysis techniques
   ))
 }
 
-.ln1ForecastDependencies <- function() {
-  return(c(
-    "forecastLength", 
-  ))
-}
-
 .ln1ForeSimulateData <- function(options) {
   set.seed(options[["seed"]])
 

@@ -183,32 +183,6 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   }
 }
 
-# .ln1TreatFormatCoefficientNames <- function(modelObject) {
-#   modelTerms <- terms(modelObject)
-
-#   coefNames <- c("(Intercept)")
-
-#   for (name in attr(modelTerms, "term.labels")) {
-#     if (grepl(":", name)) {
-#       newTerms <- c()
-#       for (subName in strsplit(name, ":")[[1]]) {
-#         if (subName %in% names(modelObject[["xlevels"]])) {
-#           for (level in modelObject[["xlevels"]][[subName]][-1]) {
-#             newTerms <- c(newTerms, paste0(subName, " (", level, ")"))
-#           }
-#         } else {
-#           newTerms <- c(newTerms, subName)
-#         }
-#       }
-#       name <- paste(newTerms, collapse = " * ")
-#     } else {
-
-#     }
-#   }
-
-#   return(coefNames)
-# }
-
 .ln1TreatFillCoefficientsTable <- function(table, modelObject, options) {
   modelSummary <- summary(modelObject)
   modelCoefficients <- data.frame(coef(modelSummary))
