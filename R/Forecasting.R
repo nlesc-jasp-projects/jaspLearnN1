@@ -200,7 +200,7 @@ Forecasting is an umbrella term that captures many different analysis techniques
       position = 1
     )
 
-    dataPlot$dependOn(c("plotData", dependencyFun()))
+    dataPlot$dependOn(c("plotData", "plotPoints", "plotLine", dependencyFun()))
 
     if (ready) {
       dataPlot$plotObject <- .ln1NetCreateDataPlotFill(dataset, options)
@@ -222,9 +222,17 @@ Forecasting is an umbrella term that captures many different analysis techniques
         x = .data[["t"]],
         y = .data[["y"]]
       )
-    ) +
-    jaspGraphs::geom_line() +
-    jaspGraphs::geom_point() +
+    )
+
+  if (options[["plotLine"]]) {
+    p <- p + jaspGraphs::geom_line()
+  }
+  
+  if (options[["plotPoints"]]) {
+    p <- p + jaspGraphs::geom_point()
+  }
+  
+  p <- p +
     ggplot2::scale_x_continuous(name = gettext("Time"), breaks = xBreaks, limits = range(xBreaks)) +
     ggplot2::scale_y_continuous(name = yName, breaks = yBreaks, limits = range(yBreaks)) +
     jaspGraphs::geom_rangeframe() +
