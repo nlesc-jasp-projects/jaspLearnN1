@@ -147,7 +147,7 @@ Form
 					name: "simPhaseEffects"
 					preferredWidth: sectionData.width - 8 * jaspTheme.contentMargin
 					minimumItems: 1
-					headerLabels: [qsTr("Name"), qsTr("Phase"), qsTr("Phase × Time"), qsTr("n")]
+					headerLabels: [qsTr("Name"), qsTr("Phase"), qsTr("Phase × Time"), qsTr("Time points")]
 					defaultValues: [
 						{"simPhaseName": "Pre-treament", "simPhaseEffectSimple": 0.0, "simPhaseEffectInteraction": 0.0, "simPhaseEffectN": 20},
 						{"simPhaseName": "Treatment", "simPhaseEffectSimple": 5.0, "simPhaseEffectInteraction": 0.0, "simPhaseEffectN": 20},

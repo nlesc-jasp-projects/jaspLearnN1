@@ -68,6 +68,8 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 
   totalN <- sum(phaseN)
 
+  set.seed(options[["seed"]])
+
   yNoise <- arima.sim(
     model = list(ar = options[["simTimeEffectAutocorrelation"]]),
     n = totalN,
@@ -138,7 +140,12 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 .ln1TreatEstimateModelHelper <- function(dataset, options) {
   f <- .ln1TreatCreateModelFormula(options)
 
-  mod <- nlme::lme(fixed = f, data=dataset, random = ~ 1 | g, correlation = nlme::corAR1())
+  mod <- nlme::lme(
+    fixed = f,
+    data=dataset,
+    random = ~ 1 | g,
+    correlation = nlme::corAR1()
+  )
 
   return(mod)
 }
@@ -242,15 +249,19 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 }
 
 .ln1TreatFillAutoCorTable <- function(table, modelObject, options) {
-  ci <- nlme::intervals(modelObject, level = options$coefficientCiLevel, which = "var-cov")
-
-  ciAutoCor <- data.frame(ci[["corStruct"]])
+  ci <- try(nlme::intervals(modelObject, level = options$coefficientCiLevel, which = "all"))
 
   table[["name"]] <- "AR(1)"
 
-  table[["coef"]]  <- ciAutoCor[["est."]]
-  table[["lower"]] <- ciAutoCor[["lower"]]
-  table[["upper"]] <- ciAutoCor[["upper"]]
+  if (!jaspBase::isTryError(ci)) {
+    ciAutoCor <- data.frame(ci[["corStruct"]])
+
+    table[["coef"]]  <- ciAutoCor[["est."]]
+    table[["lower"]] <- ciAutoCor[["lower"]]
+    table[["upper"]] <- ciAutoCor[["upper"]]
+  } else {
+    table$setError(gettext("Cannot estimate auto-correlation."))
+  }
 }
 
 .ln1TreatCreateDataPlot <- function(jaspResults, dataset, options, dependencyFun, ready) {
