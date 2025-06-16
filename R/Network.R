@@ -247,10 +247,8 @@ Network <- function(jaspResults, dataset = NULL, options) {
     return(ggplot2::aes(!!!args))
   }
 
-  # colorFun <- jaspGraphs::JASPcolors(options[["colorPalette"]], asFunction = TRUE)
-
   p <- p +
-    ggraph::geom_edge_link(
+    ggraph::geom_edge_fan(
       mapping = do.call(getAes, args = edgeArgs),
       arrow = grid::arrow(),
       show.legend = FALSE
