@@ -31,6 +31,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   .ln1TreatCreateDataPlot(jaspResults, dataset, options, .ln1TreatGetDataDependencies, ready)
   .ln1TreatEstimateModel(jaspResults, dataset, options, ready)
   .ln1TreatCreateCoefficientsTable(jaspResults, options, ready)
+  .ln1TreatCreateAutoCorTable(jaspResults, options, ready)
 
   return()
 }
@@ -51,6 +52,9 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
     }
   }
 
+  # Add dummy grouping variable for mixed model
+  dataset[["g"]] <- rep(1, nrow(dataset))
+
   return(dataset)
 }
 
@@ -64,7 +68,11 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 
   totalN <- sum(phaseN)
 
-  yNoise <- rnorm(totalN, options[["simDependentMean"]], options[["simDependentSd"]])
+  yNoise <- arima.sim(
+    model = list(ar = options[["simTimeEffectAutocorrelation"]]),
+    n = totalN,
+    sd = options[["simDependentSd"]]
+  )
 
   phaseName <- rep(phaseNames, phaseN)
   phaseBeta <- rep(phaseEffects, phaseN)
@@ -73,7 +81,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
   time <- unlist(lapply(phaseN, seq_len))
   timeEffect <- options[["simTimeEffect"]]
 
-  y <- timeEffect * time + phaseBeta + time * phaseInt + yNoise
+  y <- options[["simDependentMean"]] + timeEffect * time + phaseBeta + time * phaseInt + yNoise
 
   simData <- data.frame(
     y = y,
@@ -130,7 +138,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 .ln1TreatEstimateModelHelper <- function(dataset, options) {
   f <- .ln1TreatCreateModelFormula(options)
 
-  mod <- stats::lm(f, data=dataset)
+  mod <- nlme::lme(fixed = f, data=dataset, random = ~ 1 | g, correlation = nlme::corAR1())
 
   return(mod)
 }
@@ -147,7 +155,7 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 .ln1TreatCreateCoefficientsTable <- function(jaspResults, options, ready) {
   if (is.null(jaspResults[["coefTable"]])) {
     table <- createJaspTable(gettext("Coefficients"))
-    table$dependOn(.ln1TreatGetDataDependencies())
+    table$dependOn(c(.ln1TreatGetDataDependencies(), "coefficientCiLevel"))
 
     table$addColumnInfo(name = "name",         title = "",                        type = "string")
     table$addColumnInfo(name = "coef",         title = gettext("Estimate"),       type = "number")
@@ -195,20 +203,54 @@ Treatment <- function(jaspResults, dataset = NULL, options) {
 # }
 
 .ln1TreatFillCoefficientsTable <- function(table, modelObject, options) {
-  print(terms(modelObject))
   modelSummary <- summary(modelObject)
-  modelCoefficients <- data.frame(modelSummary[["coefficients"]])
+  modelCoefficients <- data.frame(coef(modelSummary))
 
   table[["name"]] <- row.names(modelCoefficients)
-  table[["coef"]] <- modelCoefficients[["Estimate"]]
-  table[["SE"]] <- modelCoefficients[["Std..Error"]]
+  table[["coef"]] <- modelCoefficients[["Value"]]
+  table[["SE"]] <- modelCoefficients[["Std.Error"]]
   table[["t"]] <- modelCoefficients[["t.value"]]
-  table[["p"]] <- modelCoefficients[["Pr...t.."]]
+  table[["p"]] <- modelCoefficients[["p.value"]]
 
-  ci <- confint(modelObject, level = options$coefficientCiLevel)
+  ci <- nlme::intervals(modelObject, level = options$coefficientCiLevel, which = "fixed")
 
-  table[["lower"]] <- ci[ ,1]
-  table[["upper"]] <- ci[ ,2]
+  ciFixed <- data.frame(ci[["fixed"]])
+
+  table[["lower"]] <- ciFixed[["lower"]]
+  table[["upper"]] <- ciFixed[["upper"]]
+}
+
+.ln1TreatCreateAutoCorTable <- function(jaspResults, options, ready) {
+  if (is.null(jaspResults[["autoCorTable"]])) {
+    table <- createJaspTable(gettext("Auto-correlation"))
+    table$dependOn(c(.ln1TreatGetDataDependencies(), "coefficientCiLevel"))
+
+    table$addColumnInfo(name = "name",         title = "",                        type = "string")
+    table$addColumnInfo(name = "coef",         title = gettext("Estimate"),       type = "number")
+
+    overtitle <- gettextf("%.0f%% CI", 100 * options$coefficientCiLevel)
+
+    table$addColumnInfo(name = "lower", title = gettext("Lower"), type = "number", overtitle = overtitle)
+    table$addColumnInfo(name = "upper", title = gettext("Upper"), type = "number", overtitle = overtitle)
+
+    if (!is.null(jaspResults[["modelState"]]) && ready) {
+      .ln1TreatFillAutoCorTable(table, jaspResults[["modelState"]]$object, options)
+    }
+
+    jaspResults[["autoCorTable"]] <- table
+  }
+}
+
+.ln1TreatFillAutoCorTable <- function(table, modelObject, options) {
+  ci <- nlme::intervals(modelObject, level = options$coefficientCiLevel, which = "var-cov")
+
+  ciAutoCor <- data.frame(ci[["corStruct"]])
+
+  table[["name"]] <- "AR(1)"
+
+  table[["coef"]]  <- ciAutoCor[["est."]]
+  table[["lower"]] <- ciAutoCor[["lower"]]
+  table[["upper"]] <- ciAutoCor[["upper"]]
 }
 
 .ln1TreatCreateDataPlot <- function(jaspResults, dataset, options, dependencyFun, ready) {
